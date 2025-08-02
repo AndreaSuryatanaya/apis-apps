@@ -8,6 +8,7 @@ import (
 	"todo-apps/handlers"
 	"todo-apps/middleware"
 	"todo-apps/models"
+	"todo-apps/services"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -47,8 +48,12 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	// Initialize services
+	auditService := services.NewAuditService(mongodb)
+
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(cfg)
+	userHandler := handlers.NewUserHandler(cfg, auditService)
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
