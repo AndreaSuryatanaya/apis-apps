@@ -11,14 +11,19 @@ import (
 )
 
 func HashPassword(password string) (string, error) {
-	// Using bcrypt for password hashing
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	// Using bcrypt for password hashing with cost 12 (good balance of security and performance)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	if err != nil {
+		// Log the error for debugging (remove in production)
+		// log.Printf("Password comparison failed: %v", err)
+		return false
+	}
+	return true
 }
 
 func GenerateJWT(userID, username string) (string, error) {

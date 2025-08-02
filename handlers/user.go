@@ -53,7 +53,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to hash password",
+			"error": "Failed to h	ash password",
 		})
 	}
 	user.Password = hashedPassword

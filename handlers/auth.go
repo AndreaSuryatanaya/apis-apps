@@ -29,6 +29,10 @@ type LoginResponse struct {
 	User  models.User `json:"user"`
 }
 
+type RegisterResponse struct {
+	User models.User `json:"user"`
+}
+
 // POST /auth/login - Login user
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req LoginRequest
@@ -41,7 +45,8 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	// Find user by username
 	var user models.User
-	if err := h.db.Where("username = ?", req.Username).First(&user).Error; err != nil {
+
+	if err := h.db.Select("*").Where("username = ?", req.Username).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "Invalid credentials",
@@ -53,13 +58,13 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	// Check password
-	if !utils.CheckPasswordHash(req.Password, user.Password) {
+	isValid := utils.CheckPasswordHash(req.Password, user.Password)
+
+	if !isValid {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid credentials",
 		})
-	}
-
-	// Generate JWT token
+	} // Generate JWT token
 	token, err := utils.GenerateJWT(user.ID.String(), user.Username)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -103,18 +108,17 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	// Generate JWT token
-	token, err := utils.GenerateJWT(user.ID.String(), user.Username)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to generate token",
-		})
-	}
+	// token, err := utils.GenerateJWT(user.ID.String(), user.Username)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": "Failed to generate token",
+	// 	})
+	// }
 
 	// Remove password from response
 	user.Password = ""
 
-	return c.Status(fiber.StatusCreated).JSON(LoginResponse{
-		Token: token,
-		User:  user,
+	return c.Status(fiber.StatusCreated).JSON(RegisterResponse{
+		User: user,
 	})
 }

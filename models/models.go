@@ -11,7 +11,7 @@ type User struct {
 	ID       uuid.UUID `json:"id" gorm:"type:uuid;primary_key"`
 	Name     string    `json:"name" gorm:"not null"`
 	Username string    `json:"username" gorm:"unique;not null"`
-	Password string    `json:"-" gorm:"not null"`
+	Password string    `json:"password,omitempty" gorm:"column:password;not null"`
 }
 
 type Task struct {
