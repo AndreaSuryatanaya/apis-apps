@@ -54,6 +54,7 @@ func main() {
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(cfg)
 	userHandler := handlers.NewUserHandler(cfg, auditService)
+	taskHandler := handlers.NewTaskHandler(cfg, auditService)
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
@@ -88,6 +89,13 @@ func main() {
 	users.Post("/", userHandler.CreateUser)
 	users.Put("/:id", userHandler.UpdateUser)
 	users.Delete("/:id", userHandler.DeleteUser)
+
+	// Task routes
+	tasks := api.Group("/tasks")
+	tasks.Get("/", taskHandler.GetTasks)
+	tasks.Post("/", taskHandler.CreateTask)
+	tasks.Put("/:id", taskHandler.UpdateTask)
+	tasks.Delete("/:id", taskHandler.DeleteTask)
 
 	// Start server
 	port := os.Getenv("PORT")
