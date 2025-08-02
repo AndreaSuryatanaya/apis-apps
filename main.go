@@ -56,6 +56,7 @@ func main() {
 	userHandler := handlers.NewUserHandler(cfg, auditService)
 	taskHandler := handlers.NewTaskHandler(cfg, auditService)
 	positionHandler := handlers.NewPositionHandler(cfg, auditService)
+	userPositionHandler := handlers.NewUserPositionHandler(cfg, auditService)
 
 	// Initialize Fiber app
 	app := fiber.New(fiber.Config{
@@ -104,6 +105,19 @@ func main() {
 	positions.Post("/", positionHandler.CreatePosition)
 	positions.Put("/:id", positionHandler.UpdatePosition)
 	positions.Delete("/:id", positionHandler.DeletePosition)
+
+	// User Position routes
+	userPositions := api.Group("/user-positions")
+	userPositions.Get("/", userPositionHandler.GetUserPositions)
+	userPositions.Post("/", userPositionHandler.CreateUserPosition)
+	userPositions.Delete("/:id", userPositionHandler.DeleteUserPosition)
+
+	app.Get("/ping", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status":  "ok",
+			"message": "server is running",
+		})
+	})
 
 	// Start server
 	port := os.Getenv("PORT")
